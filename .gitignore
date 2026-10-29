@@ -4,3 +4,6 @@ dist
 coverage
 *.tsbuildinfo
 .neon
+.vercel
+.env*
+!.env.example

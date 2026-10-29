@@ -4,9 +4,9 @@
   "buildCommand": "npm run build",
   "outputDirectory": "dist",
   "rewrites": [
-    { "source": "/api/:path*", "destination": "https://neobank-api.onrender.com/api/:path*" },
-    { "source": "/docs", "destination": "https://neobank-api.onrender.com/docs" },
-    { "source": "/docs/:path*", "destination": "https://neobank-api.onrender.com/docs/:path*" },
+    { "source": "/api/:path*", "destination": "https://neobank-api-5tsj.onrender.com/api/:path*" },
+    { "source": "/docs", "destination": "https://neobank-api-5tsj.onrender.com/docs" },
+    { "source": "/docs/:path*", "destination": "https://neobank-api-5tsj.onrender.com/docs/:path*" },
     { "source": "/(.*)", "destination": "/index.html" }
   ]
 }

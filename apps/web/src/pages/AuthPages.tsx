@@ -62,17 +62,17 @@ export function LoginPage() {
         }}
       >
         <Field label="Email">
-          <Input name="email" type="email" autoComplete="email" defaultValue="asha@neobank.dev" required />
+          <Input name="email" type="email" autoComplete="email" defaultValue="harisankar@neobank.dev" required />
         </Field>
         <Field label="Password">
-          <Input name="password" type="password" autoComplete="current-password" defaultValue="Password@123" required />
+          <Input name="password" type="password" autoComplete="current-password" defaultValue="NeoBank@2026" required />
         </Field>
         <ErrorText error={login.error} />
         <Button type="submit" className="w-full" disabled={login.isPending}>
           {login.isPending ? 'Logging in…' : 'Log in'}
         </Button>
         <p className="rounded-xl bg-indigo-50 px-3 py-2 text-xs text-indigo-700">
-          Demo: asha@neobank.dev, rahul@neobank.dev or priya@neobank.dev with password Password@123
+          Demo: harisankar@neobank.dev or ratnamanjari@neobank.dev with password NeoBank@2026
         </p>
       </form>
     </AuthShell>

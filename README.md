@@ -40,10 +40,10 @@ No `.env` file is needed: every setting has a local default. See [.env.example](
 
 | Who | Login |
 | --- | --- |
-| Customers | `asha@neobank.dev`, `rahul@neobank.dev`, `priya@neobank.dev` — password `Password@123` |
+| Customers | `harisankar@neobank.dev`, `ratnamanjari@neobank.dev` — password `NeoBank@2026` |
 | Admin console (`/admin`) | key `dev-admin-key` |
 
-The seed leaves one transfer of every kind: completed, **pending review** (Asha's ₹55,000 rent), **failed** (Rahul's ₹90,000 with only ₹40,000 available) and **reversed** (Asha's ₹1,200 sent twice).
+The seed leaves one transfer of every kind: completed, **pending review** (Harisankar's ₹55,000 rent), **failed** (Ratnamanjari's ₹90,000 with only ₹40,000 available) and **reversed** (Harisankar's ₹1,200 sent twice).
 
 Tests use a separate `neobank_test` database and Redis database 1, so they never touch your demo data:
 
@@ -272,7 +272,7 @@ Some details:
 - **At-least-once delivery.** If the relay crashes after Kafka accepted a batch but before marking it, the batch is sent again. So the **consumer must be idempotent**: the notifier has `UNIQUE (event_id, customer_id)` and `ON CONFLICT DO NOTHING`, so a duplicate message does nothing.
 - The **Kafka message key** is the transaction id, so all events of one transaction go to the same partition and stay in order.
 
-The [notifier](apps/api/src/workers/notifier.ts) turns events into messages like "₹2,500.00 sent to Rahul Mehta", which appear under the bell icon in the app.
+The [notifier](apps/api/src/workers/notifier.ts) turns events into messages like "₹2,500.00 sent to Choudhury Ratnamanjari Mohapatra", which appear under the bell icon in the app.
 
 ### Step 14: Audit trail
 

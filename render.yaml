@@ -2,7 +2,8 @@
 # Render → New → Blueprint → pick this repository. It asks for the values marked `sync: false`.
 #
 # Postgres and Redis come from free external services (Render's free Postgres expires after 30 days):
-#   DATABASE_URL  Neon: use the *direct* connection string (host without "-pooler"), ending in ?sslmode=require
+#   DATABASE_URL           Neon pooled connection string (host with "-pooler"), for app traffic
+#   DATABASE_URL_UNPOOLED  Neon direct connection string, used only by migrations
 #   REDIS_URL     Upstash: the rediss://… URL (TLS)
 # Kafka is optional: EVENT_TRANSPORT=direct delivers events in-process. To use Aiven Kafka instead,
 # set EVENT_TRANSPORT=kafka plus the KAFKA_* variables described in the README.
@@ -12,6 +13,8 @@ services:
     name: neobank-api
     runtime: docker
     plan: free
+    # Same AWS region as Neon (aws-us-east-1) and Upstash (us-east-1); Render's default is Oregon.
+    region: virginia
     branch: staging
     dockerfilePath: ./apps/api/Dockerfile
     dockerContext: .
@@ -27,6 +30,9 @@ services:
       - key: EVENT_TRANSPORT
         value: direct
       - key: DATABASE_URL
+        sync: false
+      # Neon's direct (non-pooled) string; migrations need a real session for their advisory lock.
+      - key: DATABASE_URL_UNPOOLED
         sync: false
       - key: REDIS_URL
         sync: false

@@ -24,6 +24,8 @@ const schema = z.object({
   PORT: z.coerce.number().int().positive().default(3100),
   LOG_LEVEL: z.string().default('info'),
   DATABASE_URL: z.string().default('postgresql://neobank:neobank@localhost:5435/neobank'),
+  // Direct (non-pooled) connection for migrations, e.g. Neon's DATABASE_URL_UNPOOLED.
+  DATABASE_URL_UNPOOLED: z.string().optional(),
   REDIS_URL: z.string().default('redis://localhost:6382'),
   // How the outbox relay delivers events: through Kafka, or straight to the notifier
   // in the same process ("direct", for hosts without a Kafka cluster).

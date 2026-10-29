@@ -1,5 +1,7 @@
 import { readdir, readFile } from 'node:fs/promises';
 import { fileURLToPath } from 'node:url';
+import pg from 'pg';
+import { env } from '../config/env.js';
 import { pool } from './pool.js';
 
 const migrationsDir = fileURLToPath(new URL('./migrations/', import.meta.url));
@@ -7,9 +9,16 @@ const migrationsDir = fileURLToPath(new URL('./migrations/', import.meta.url));
 /**
  * Applies each .sql file in migrations/ once, in filename order.
  * An advisory lock stops two processes migrating at the same time.
+ *
+ * The advisory lock belongs to a database session. A pooler in transaction
+ * mode (Neon's -pooler endpoint, PgBouncer) can hand each statement a
+ * different session, so the lock would not hold. When a direct connection
+ * string is available (DATABASE_URL_UNPOOLED), migrations use it.
  */
 export async function migrate(): Promise<string[]> {
-  const client = await pool.connect();
+  const direct = env.DATABASE_URL_UNPOOLED ? new pg.Client({ connectionString: env.DATABASE_URL_UNPOOLED }) : null;
+  if (direct) await direct.connect();
+  const client = direct ?? (await pool.connect());
   const applied: string[] = [];
   try {
     await client.query('SELECT pg_advisory_lock(424242)');
@@ -41,7 +50,8 @@ export async function migrate(): Promise<string[]> {
     return applied;
   } finally {
     await client.query('SELECT pg_advisory_unlock(424242)');
-    client.release();
+    if (direct) await direct.end();
+    else (client as pg.PoolClient).release();
   }
 }
 

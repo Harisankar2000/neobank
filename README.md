@@ -51,6 +51,37 @@ Tests use a separate `neobank_test` database and Redis database 1, so they never
 npm test
 ```
 
+### Deploy for free
+
+| Part | Service | Config in this repo |
+| --- | --- | --- |
+| React app | [Vercel](https://vercel.com) | [apps/web/vercel.json](apps/web/vercel.json): builds with Vite and forwards `/api` and `/docs` to the API, so the browser sees one domain (no CORS) |
+| API + worker | [Render](https://render.com) free web service | [render.yaml](render.yaml): Docker build, health check, `RUN_WORKER_IN_API=true` (the free plan has no background workers) |
+| PostgreSQL | [Neon](https://neon.tech) free plan | Use the **direct** connection string (not `-pooler`): migrations take a session-level advisory lock |
+| Redis | [Upstash](https://upstash.com) free plan | The `rediss://` URL (TLS) |
+| Kafka (optional) | [Aiven](https://aiven.io/free-kafka) free plan | Set `EVENT_TRANSPORT=kafka` and the `KAFKA_*` variables below |
+
+**Without Kafka** (`EVENT_TRANSPORT=direct`), the outbox relay hands events straight to the notifier inside the same process. Everything else is identical — the outbox table, at-least-once delivery, the idempotent consumer. Only the transport changes, which is exactly what the outbox's `Publisher` interface is for.
+
+**With Aiven Kafka**, create the topic `bank.events` (2 partitions on the free plan) in the Aiven console, then set `EVENT_TRANSPORT=kafka`, `KAFKA_BROKERS=<host:port>`, `KAFKA_TOPIC_PARTITIONS=2`, and the certificates from the service page: `KAFKA_SSL_CA`, `KAFKA_SSL_CERT`, `KAFKA_SSL_KEY`. Use SASL instead with `KAFKA_SASL_USERNAME`, `KAFKA_SASL_PASSWORD` and `KAFKA_SSL=true`.
+
+Steps:
+
+1. **Neon** and **Upstash**: create a free database on each and copy the connection URLs.
+2. **Render**: New → Blueprint → this repository. Enter `DATABASE_URL`, `REDIS_URL` and an `ADMIN_API_KEY` (`openssl rand -hex 32`). Wait until `https://<service>.onrender.com/health` responds. Load demo data once from the service's **Shell** tab: `node dist/dev/seed.js`.
+3. **Vercel**: Add New → Project → this repository, root directory `apps/web`. If your Render URL isn't `https://neobank-api.onrender.com`, change it in `apps/web/vercel.json` first.
+
+Free-tier trade-offs: Render puts the API to sleep after 15 minutes without traffic, so the first request afterwards takes about a minute. Events written while it slept stay in the outbox and are delivered as soon as it wakes — the outbox doing its job.
+
+### Deploy on your own server
+
+[docker-compose.prod.yml](docker-compose.prod.yml) runs the whole stack on any machine with Docker (a VPS, Coolify, Oracle Cloud's free VM): nginx serving the React app, the API, the worker, Postgres, Redis and Kafka. Only `web` is exposed. It uses about 600 MB of RAM. Set `POSTGRES_PASSWORD`, `JWT_SECRET` and `ADMIN_API_KEY` (each `openssl rand -hex 32`); the API refuses to start in production with development defaults.
+
+```bash
+docker compose -f docker-compose.prod.yml up -d --build
+docker compose -f docker-compose.prod.yml exec api node dist/dev/seed.js   # optional demo data
+```
+
 ---
 
 ## 2. The big picture

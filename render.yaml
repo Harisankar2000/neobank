@@ -1,0 +1,36 @@
+# Render Blueprint for the NeoBank API (free plan).
+# Render → New → Blueprint → pick this repository. It asks for the values marked `sync: false`.
+#
+# Postgres and Redis come from free external services (Render's free Postgres expires after 30 days):
+#   DATABASE_URL  Neon: use the *direct* connection string (host without "-pooler"), ending in ?sslmode=require
+#   REDIS_URL     Upstash: the rediss://… URL (TLS)
+# Kafka is optional: EVENT_TRANSPORT=direct delivers events in-process. To use Aiven Kafka instead,
+# set EVENT_TRANSPORT=kafka plus the KAFKA_* variables described in the README.
+
+services:
+  - type: web
+    name: neobank-api
+    runtime: docker
+    plan: free
+    branch: staging
+    dockerfilePath: ./apps/api/Dockerfile
+    dockerContext: .
+    healthCheckPath: /health
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: TRUST_PROXY
+        value: 'true'
+      # Render's free plan has no background workers, so the API runs the outbox relay itself.
+      - key: RUN_WORKER_IN_API
+        value: 'true'
+      - key: EVENT_TRANSPORT
+        value: direct
+      - key: DATABASE_URL
+        sync: false
+      - key: REDIS_URL
+        sync: false
+      - key: JWT_SECRET
+        generateValue: true
+      - key: ADMIN_API_KEY
+        sync: false

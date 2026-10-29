@@ -24,6 +24,7 @@ export async function buildApp({ redis, sharedRateLimit = true }: BuildAppOption
   const app = Fastify({
     logger: env.NODE_ENV === 'test' ? false : { level: env.LOG_LEVEL },
     genReqId: () => randomUUID(),
+    trustProxy: env.TRUST_PROXY,
     bodyLimit: 64 * 1024,
   });
 

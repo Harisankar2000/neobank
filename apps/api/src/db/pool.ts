@@ -1,5 +1,12 @@
+import net from 'node:net';
 import pg from 'pg';
 import { env } from '../config/env.js';
+
+// When a database host has both IPv4 and IPv6 addresses, Node tries IPv4 for
+// only 250 ms before switching to IPv6. A far-away managed database (Neon, from
+// India: ~230 ms per handshake) on a network without IPv6 then fails at random
+// with ETIMEDOUT. Give each attempt up to 2.5 s instead.
+net.setDefaultAutoSelectFamilyAttemptTimeout(2500);
 
 // Postgres returns bigint as a string by default. Our money columns are bigint
 // paise and stay far below 2^53, so it is safe to read them as numbers.

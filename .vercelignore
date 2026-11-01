@@ -1,0 +1,12 @@
+# Never upload secrets or local tooling when deploying from this machine.
+.env
+.env.*
+!.env.example
+.neon
+.claude
+.mcp.json
+skills-lock.json
+node_modules
+**/node_modules
+**/dist
+coverage

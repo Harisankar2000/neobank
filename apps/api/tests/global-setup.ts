@@ -10,6 +10,7 @@ export default async function setup() {
   await admin.end();
 
   process.env.DATABASE_URL = TEST_DATABASE_URL;
+  process.env.DATABASE_URL_UNPOOLED = TEST_DATABASE_URL;
   const { migrate } = await import('../src/db/migrate.js');
   const { pool } = await import('../src/db/pool.js');
   await migrate();

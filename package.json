@@ -8,9 +8,14 @@
     "dev:api": "npm run dev -w apps/api",
     "dev:worker": "npm run dev:worker -w apps/api",
     "dev:web": "npm run dev -w apps/web",
+    "build": "npm run build --workspaces",
     "migrate": "npm run migrate -w apps/api",
     "seed": "npm run seed -w apps/api",
     "test": "npm test -w apps/api",
     "typecheck": "npm run typecheck --workspaces"
+  },
+  "dependencies": {
+    "@neon/config": "^1.9.5",
+    "@neon/env": "^1.6.6"
   }
 }

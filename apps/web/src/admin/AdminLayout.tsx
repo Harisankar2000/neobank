@@ -43,8 +43,8 @@ export function AdminLayout() {
               setHasKey(true);
             }}
           >
-            <Field label="Admin key" hint="Local default: dev-admin-key (ADMIN_API_KEY on the API)">
-              <Input name="key" type="password" defaultValue="dev-admin-key" required autoFocus />
+            <Field label="Admin key" hint="Demo key: harish_2026 (when running locally: dev-admin-key)">
+              <Input name="key" type="password" defaultValue="harish_2026" required autoFocus />
             </Field>
             <Button type="submit" className="w-full">
               Open console

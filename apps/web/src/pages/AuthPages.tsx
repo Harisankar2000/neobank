@@ -1,7 +1,25 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query';
-import type { ReactNode } from 'react';
+import { useEffect, useState, type ReactNode } from 'react';
 import { Link, useNavigate } from 'react-router';
 import { request, setToken } from '../api/client';
+
+/** True once `pending` has lasted a few seconds: on Render's free plan the API may be waking from sleep. */
+function useSlow(pending: boolean): boolean {
+  const [slow, setSlow] = useState(false);
+  useEffect(() => {
+    if (!pending) return setSlow(false);
+    const timer = setTimeout(() => setSlow(true), 4000);
+    return () => clearTimeout(timer);
+  }, [pending]);
+  return slow;
+}
+
+function WakingNote({ show }: { show: boolean }) {
+  if (!show) return null;
+  return (
+    <p className="text-center text-xs text-slate-500">Waking up the server, this can take up to a minute after it has been idle.</p>
+  );
+}
 import { Brand } from '../components/Brand';
 import { Button, Card, ErrorText, Field, Input } from '../components/ui';
 
@@ -23,6 +41,11 @@ function formValues(form: HTMLFormElement): Record<string, string> {
 }
 
 function AuthShell({ title, children, footer }: { title: string; children: ReactNode; footer: ReactNode }) {
+  // Start waking a sleeping API while the user is still typing.
+  useEffect(() => {
+    request('/ping', { as: 'public' }).catch(() => {});
+  }, []);
+
   return (
     <div className="grid min-h-screen place-items-center px-4 py-10">
       <div className="w-full max-w-sm">
@@ -41,6 +64,7 @@ function AuthShell({ title, children, footer }: { title: string; children: React
 
 export function LoginPage() {
   const login = useAuth('/auth/login');
+  const slow = useSlow(login.isPending);
   return (
     <AuthShell
       title="Log in"
@@ -71,6 +95,7 @@ export function LoginPage() {
         <Button type="submit" className="w-full" disabled={login.isPending}>
           {login.isPending ? 'Logging in…' : 'Log in'}
         </Button>
+        <WakingNote show={slow} />
         <p className="rounded-xl bg-indigo-50 px-3 py-2 text-xs text-indigo-700">
           Demo: harisankar@neobank.dev or ratnamanjari@neobank.dev with password NeoBank@2026
         </p>
@@ -81,6 +106,7 @@ export function LoginPage() {
 
 export function RegisterPage() {
   const register = useAuth('/auth/register');
+  const slow = useSlow(register.isPending);
   return (
     <AuthShell
       title="Open your account"
@@ -116,6 +142,7 @@ export function RegisterPage() {
         <Button type="submit" className="w-full" disabled={register.isPending}>
           {register.isPending ? 'Creating…' : 'Create account'}
         </Button>
+        <WakingNote show={slow} />
         <p className="text-xs text-slate-500">A savings account is opened for you straight away.</p>
       </form>
     </AuthShell>

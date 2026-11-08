@@ -71,7 +71,7 @@ Steps:
 2. **Render**: New → Blueprint → this repository. Enter `DATABASE_URL`, `REDIS_URL` and an `ADMIN_API_KEY` (`openssl rand -hex 32`). Wait until `https://<service>.onrender.com/health` responds. Load demo data once from the service's **Shell** tab: `node dist/dev/seed.js`.
 3. **Vercel**: Add New → Project → this repository, root directory `apps/web`. If your Render URL isn't `https://neobank-api.onrender.com`, change it in `apps/web/vercel.json` first.
 
-Free-tier trade-offs: Render puts the API to sleep after 15 minutes without traffic, so the first request afterwards takes about a minute. Events written while it slept stay in the outbox and are delivered as soon as it wakes — the outbox doing its job.
+Free-tier trade-offs: Render puts the API to sleep after 15 minutes without traffic, so the first request afterwards takes about a minute. The login page pings `/api/v1/ping` when it opens to start that wake-up early; to avoid it entirely, have a free cron service (cron-job.org, UptimeRobot) request `https://<service>.onrender.com/api/v1/ping` every 10 minutes. Use `/ping`, not `/health`: it doesn't touch the database, so Neon can still scale to zero. Events written while it slept stay in the outbox and are delivered as soon as it wakes — the outbox doing its job.
 
 ### Deploy on your own server
 

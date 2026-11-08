@@ -72,6 +72,10 @@ export async function buildApp({ redis, sharedRateLimit = true }: BuildAppOption
     return { status: 'server is working fine!' };
   });
 
+  // Liveness only: wakes a sleeping Render instance without touching Postgres or Redis, so
+  // keep-alive pings don't also keep Neon's compute awake. Under /api/v1 so Vercel forwards it.
+  app.get('/api/v1/ping', { config: { rateLimit: false } }, async () => ({ status: 'ok' }));
+
   await app.register(
     async (api) => {
       await api.register(customerRoutes, { redis });

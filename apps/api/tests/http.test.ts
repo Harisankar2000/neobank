@@ -133,4 +133,10 @@ describe('health', () => {
     const response = await app.inject({ method: 'GET', url: '/health' });
     expect(response.statusCode).toBe(200);
   });
+
+  it('answers the keep-alive ping without auth', async () => {
+    const response = await app.inject({ method: 'GET', url: '/api/v1/ping' });
+    expect(response.statusCode).toBe(200);
+    expect(response.json()).toEqual({ status: 'ok' });
+  });
 });
